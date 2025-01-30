@@ -10,6 +10,8 @@ function HomePage(){
 
     const [books, setBooks] = useState([]);
 
+    const [filterBooks, setFilterBooks] = useState(books);
+
     useEffect(() => {
         if(data){
             setBooks(data)
@@ -31,6 +33,22 @@ function HomePage(){
         }
     }
 
+
+    const getFilterBooks = (status) => {
+
+        if(status === 'All'){
+            setFilterBooks(books)
+        }else if (status === 'Read') {
+            const filtered = books.filter((book) => book.status === true);
+            setFilterBooks(filtered);
+        } else if (status === 'Unread') {
+            const filtered = books.filter((book) => book.status === false);
+            setFilterBooks(filtered);
+        }
+        
+    }
+
+
     if(loading) return <p>Loading...</p>
 
 
@@ -44,9 +62,16 @@ function HomePage(){
 
           <hr />
 
+          <h2 className="text-light">Filters</h2>
+
+          <button className="btn btn-light me-2" onClick={() => getFilterBooks('All')} value="All">All ({books.length})</button>
+          <button className="btn btn-light me-2" onClick={() => getFilterBooks('Read')} value="Read">Read</button>
+          <button className="btn btn-light" onClick={() => getFilterBooks('Unread')} value="Unread">Unread</button>
           <div className="row">
 
-          {books && books.length>0 ? (books?.map((book, index) => (
+
+
+          {filterBooks && filterBooks.length>0 ? (filterBooks?.map((book, index) => (
             <div className="col-md-3" key={index}>
                 <div className="card mt-3 p-0">
                     <img className="img-top" src={`https://placehold.co/600x400?text=Book+${index + 1}`} />
