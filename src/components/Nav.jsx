@@ -4,7 +4,7 @@ import { NavLink } from "react-router-dom"
 export default function Nav(){
 
     return(
-        <nav className="navbar navbar-tertiary bg-light">
+        <nav className="navbar navbar-dark bg-dark">
             <div className="container">
 
             
