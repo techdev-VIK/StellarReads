@@ -14,12 +14,28 @@ function HomePage(){
 
     const [selectedFilter, setSelectedFilter] = useState("All");
 
+
+
     useEffect(() => {
-        if(data){
-            setBooks(data)
+        const storedBooks = localStorage.getItem('books');
+        if(storedBooks){
+            setBooks(JSON.parse(storedBooks));
+            setFilterBooks(JSON.parse(storedBooks))
+        }else if(data){
+            setBooks(data);
             setFilterBooks(data);
+            localStorage.setItem('books', JSON.stringify(data));
         }
     }, [data])
+
+    useEffect(() => {
+        if(books.length > 0){
+            localStorage.setItem('books', JSON.stringify(books))
+        }
+    }, [books])
+
+
+    //Delete a book:
 
     const handleDelete = async (id) => {
 
@@ -30,7 +46,8 @@ function HomePage(){
 
             if(response.ok){
                 setBooks((prevBooks) => {
-                    const updatedBooks = prevBooks.filter((book) => book._id !== id)
+                    const updatedBooks = prevBooks.filter((book) => book._id !== id);
+                    setBooks(updatedBooks)
                     setFilterBooks(updatedBooks)
                 })
             }
@@ -52,6 +69,14 @@ function HomePage(){
             setFilterBooks(books.filter((book) => book.status === false)); // Unread books
         }
        
+    }
+
+
+    const handleStatusToggle = (id) => {
+        const updatedBooks = books.map((book) => book._id === id ? {...book, status: !book.status} : book);
+
+        setBooks(updatedBooks);
+        setFilterBooks(updatedBooks);
     }
 
 
@@ -100,7 +125,7 @@ function HomePage(){
                         <div className="d-flex justify-content-between">
                         
 
-                        <button className={`btn btn-sm ${!book.status ? "btn-success" : "btn-secondary"}`}>{!book.status ? "Mark As Read" : "Mark As Unread"}</button>
+                        <button className={`btn btn-sm ${!book.status ? "btn-success" : "btn-secondary"}`} onClick={() => handleStatusToggle(book._id)}>{!book.status ? "Mark As Read" : "Mark As Unread"}</button>
 
                         <button className="btn btn-dark" onClick={() => handleDelete(book._id)}>
                             Delete
