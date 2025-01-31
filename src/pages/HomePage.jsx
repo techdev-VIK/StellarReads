@@ -12,9 +12,12 @@ function HomePage(){
 
     const [filterBooks, setFilterBooks] = useState(books);
 
+    const [selectedFilter, setSelectedFilter] = useState("All");
+
     useEffect(() => {
         if(data){
             setBooks(data)
+            setFilterBooks(data);
         }
     }, [data])
 
@@ -26,7 +29,10 @@ function HomePage(){
             })
 
             if(response.ok){
-                setBooks(books.filter((book) => book._id !== id));
+                setBooks((prevBooks) => {
+                    const updatedBooks = prevBooks.filter((book) => book._id !== id)
+                    setFilterBooks(updatedBooks)
+                })
             }
         } catch (error) {
             console.error(error.message)
@@ -34,20 +40,22 @@ function HomePage(){
     }
 
 
-    const getFilterBooks = (status) => {
+    const statusFilterHandler = (filter) => {
 
-        if(status === 'All'){
+        setSelectedFilter(filter);
+
+        if(filter === "All"){
             setFilterBooks(books)
-        }else if (status === 'Read') {
-            const filtered = books.filter((book) => book.status === true);
-            setFilterBooks(filtered);
-        } else if (status === 'Unread') {
-            const filtered = books.filter((book) => book.status === false);
-            setFilterBooks(filtered);
+        }else if (filter === "Read") {
+            setFilterBooks(books.filter((book) => book.status === true));  // Read books
+        } else {
+            setFilterBooks(books.filter((book) => book.status === false)); // Unread books
         }
-        
+       
     }
 
+
+    
 
     if(loading) return <p>Loading...</p>
 
@@ -56,23 +64,31 @@ function HomePage(){
 
     return(
         <>
-        <div className="container py-5">
+        <div className="container py-4">
 
-          <h1 className="text-light">Library</h1>
+        <div className="text-center">
+        <h1 className="text-light">Library</h1>
+        </div>
+          
 
           <hr />
 
           <h2 className="text-light">Filters</h2>
 
-          <button className="btn btn-light me-2" onClick={() => getFilterBooks('All')} value="All">All ({books.length})</button>
-          <button className="btn btn-light me-2" onClick={() => getFilterBooks('Read')} value="Read">Read</button>
-          <button className="btn btn-light" onClick={() => getFilterBooks('Unread')} value="Unread">Unread</button>
+
+            <div className="d-flex gap-2">
+                {['All', 'Read', 'Unread'].map((filter) => (
+                    <button key={filter} onClick={() => statusFilterHandler(filter)} className={`btn  rounded ${selectedFilter === filter ? "btn-primary" : "btn-light"} `}>
+                    {filter}
+                    </button>
+                ))}
+            </div>
+
+
           <div className="row">
 
-
-
           {filterBooks && filterBooks.length>0 ? (filterBooks?.map((book, index) => (
-            <div className="col-md-3" key={index}>
+            <div className="col-md-4" key={index}>
                 <div className="card mt-3 p-0">
                     <img className="img-top" src={`https://placehold.co/600x400?text=Book+${index + 1}`} />
 
@@ -81,11 +97,18 @@ function HomePage(){
 
                         <p><strong>Author: </strong>{book.author}</p>
 
-                        <p><strong>Status:</strong>{book.status ? "Read" : "Unread"}</p>
+                        <div className="d-flex justify-content-between">
+                        
+
+                        <button className={`btn btn-sm ${!book.status ? "btn-success" : "btn-secondary"}`}>{!book.status ? "Mark As Read" : "Mark As Unread"}</button>
 
                         <button className="btn btn-dark" onClick={() => handleDelete(book._id)}>
                             Delete
                         </button>
+                        </div>
+                        
+
+                        
                     </div>  
                 </div>
             </div>

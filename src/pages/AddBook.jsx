@@ -70,7 +70,10 @@ function AddBook(){
 
                 <hr /> 
 
+                <div className="text-center">
                 <button type="submit" className="btn btn-primary mt-3 ">Submit</button>
+                </div>
+                
 
                 </form>
 
