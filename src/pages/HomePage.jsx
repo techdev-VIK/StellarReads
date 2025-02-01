@@ -8,9 +8,8 @@ function HomePage(){
 
     const {data, loading, error} = useFetch('http://localhost:3000/allBooks');
 
-    const [books, setBooks] = useState([]);
 
-    const [filterBooks, setFilterBooks] = useState(books);
+    const [filterBooks, setFilterBooks] = useState(data);
 
     const [selectedFilter, setSelectedFilter] = useState("All");
 
@@ -19,20 +18,12 @@ function HomePage(){
     useEffect(() => {
         const storedBooks = localStorage.getItem('books');
         if(storedBooks){
-            setBooks(JSON.parse(storedBooks));
-            setFilterBooks(JSON.parse(storedBooks))
+            setFilterBooks(JSON.parse(storedBooks));
         }else if(data){
-            setBooks(data);
             setFilterBooks(data);
             localStorage.setItem('books', JSON.stringify(data));
         }
     }, [data])
-
-    useEffect(() => {
-        if(books.length > 0){
-            localStorage.setItem('books', JSON.stringify(books))
-        }
-    }, [books])
 
 
     //Delete a book:
@@ -45,10 +36,7 @@ function HomePage(){
             })
 
             if(response.ok){
-                setBooks((prevBooks) => {
-                    const updatedBooks = prevBooks.filter((book) => book._id !== id);
-                    setBooks(updatedBooks)
-                    setFilterBooks(updatedBooks)
+                setFilterBooks((prevBooks) => { prevBooks.filter((book) => book._id !== id);
                 })
             }
         } catch (error) {
@@ -62,24 +50,25 @@ function HomePage(){
         setSelectedFilter(filter);
 
         if(filter === "All"){
-            setFilterBooks(books)
+            setFilterBooks(data)
         }else if (filter === "Read") {
-            setFilterBooks(books.filter((book) => book.status === true));  // Read books
+            setFilterBooks(data.filter((book) => book.status === true));  // Read books
         } else {
-            setFilterBooks(books.filter((book) => book.status === false)); // Unread books
+            setFilterBooks(data.filter((book) => book.status === false)); // Unread books
         }
        
     }
 
 
     const handleStatusToggle = (id) => {
-        const updatedBooks = books.map((book) => book._id === id ? {...book, status: !book.status} : book);
+        const getBooks = JSON.parse(localStorage.getItem('books'))
 
-        setBooks(updatedBooks);
+
+        const updatedBooks = getBooks.map((book) => book._id === id ? {...book, status: !book.status} : book);
+
         setFilterBooks(updatedBooks);
+        localStorage.setItem('books', JSON.stringify(updatedBooks));
     }
-
-
     
 
     if(loading) return <p>Loading...</p>
@@ -122,8 +111,10 @@ function HomePage(){
 
                         <p><strong>Author: </strong>{book.author}</p>
 
+                        <p><strong>Status: </strong>{book.status ? "Read": "Unread"}</p>
+
+
                         <div className="d-flex justify-content-between">
-                        
 
                         <button className={`btn btn-sm ${!book.status ? "btn-success" : "btn-secondary"}`} onClick={() => handleStatusToggle(book._id)}>{!book.status ? "Mark As Read" : "Mark As Unread"}</button>
 
@@ -131,9 +122,7 @@ function HomePage(){
                             Delete
                         </button>
                         </div>
-                        
-
-                        
+                    
                     </div>  
                 </div>
             </div>
